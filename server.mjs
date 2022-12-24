@@ -6,12 +6,16 @@ import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHt
 import { watch } from "fs";
 import { readFile } from "fs/promises";
 
+import express from "express";
+import { expressjwt } from "express-jwt";
+
 import http from "http";
 import cors from "cors";
-import express from "express";
 import bodyParser from "body-parser";
 
-const port = process.env.PORT || 8000;
+// server config
+const port = process.env.GATEWAY_PORT;
+const secret = process.env.GATEWAY_SECRET;
 const supergraphSchema = "/data/supergraph.graphql";
 
 // instantiate gateway
@@ -42,10 +46,9 @@ const gateway = new ApolloGateway({
     return new RemoteGraphQLDataSource({
       url,
       willSendRequest({ request, context }) {
-        console.log(context);
         request.http.headers.set(
-          "session",
-          context.session ? JSON.stringify(context.session) : null
+          "user",
+          context.user ? JSON.stringify(context.user) : null
         );
       },
     });
@@ -54,6 +57,8 @@ const gateway = new ApolloGateway({
 
 // set up express server
 const app = express();
+
+// set up HTTP server
 const httpServer = http.createServer(app);
 const server = new ApolloServer({
   gateway: gateway,
@@ -63,21 +68,21 @@ const server = new ApolloServer({
 // wait for server to start
 await server.start();
 
-// handle CORS, body parsing and expressMiddleware
+// add middleware
 app.use(
   "/",
   cors(),
   bodyParser.json(),
+  expressjwt({
+    secret: secret,
+    algorithms: ["HS256"],
+    credentialsRequired: false,
+  }),
   expressMiddleware(server, {
-    context: async ({ req }) => ({
-      user: {
-        id: "0",
-        firstName: "first",
-        lastName: "last",
-        email: "first.last@iiit.ac.in",
-        role: "slc",
-      },
-    }),
+    context: ({ req }) => {
+      const user = req.auth || null;
+      return { user };
+    },
   })
 );
 
