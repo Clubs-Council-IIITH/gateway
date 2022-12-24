@@ -1,6 +1,6 @@
 import { ApolloServer } from "@apollo/server";
 import { startStandaloneServer } from "@apollo/server/standalone";
-import { ApolloGateway } from "@apollo/gateway";
+import { ApolloGateway, RemoteGraphQLDataSource } from "@apollo/gateway";
 import { watch } from "fs";
 import { readFile } from "fs/promises";
 
@@ -29,8 +29,34 @@ const server = new ApolloServer({
         },
       };
     },
+
+    buildService({ url }) {
+      return new RemoteGraphQLDataSource({
+        url,
+        willSendRequest({ request, context }) {
+          console.log(context);
+          request.http.headers.set(
+            "session",
+            context.session ? JSON.stringify(context.session) : null
+          );
+        },
+      });
+    },
   }),
 });
 
-const { url } = await startStandaloneServer(server, { listen: { port } });
+const { url } = await startStandaloneServer(server, {
+  listen: { port },
+  context: async ({ req, res }) => {
+    const user = {
+      id: "0",
+      firstName: "first",
+      lastName: "last",
+      email: "first.last@iiit.ac.in",
+      role: "slc",
+    };
+    return { session: user };
+  },
+});
+
 console.log(`Gateway started at ${url}`);
