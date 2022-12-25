@@ -45,11 +45,22 @@ const gateway = new ApolloGateway({
   buildService({ url }) {
     return new RemoteGraphQLDataSource({
       url,
+
+      // pass user as context item
       willSendRequest({ request, context }) {
         request.http.headers.set(
           "user",
           context.user ? JSON.stringify(context.user) : null
         );
+      },
+
+      // forward all headers from subgraphs
+      didReceiveResponse({ response, context }) {
+        const headers = response?.http?.headers;
+        headers?.forEach((value, key) => {
+          context?.res?.setHeader?.(key, value);
+        });
+        return response;
       },
     });
   },
@@ -79,9 +90,9 @@ app.use(
     credentialsRequired: false,
   }),
   expressMiddleware(server, {
-    context: ({ req }) => {
+    context: ({ req, res }) => {
       const user = req.auth || null;
-      return { user };
+      return { user, req, res };
     },
   })
 );
