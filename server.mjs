@@ -17,6 +17,10 @@ import bodyParser from "body-parser";
 const port = process.env.GATEWAY_PORT;
 const secret = process.env.GATEWAY_SECRET;
 const supergraphSchema = "/data/supergraph.graphql";
+const corsOptions = {
+  origin: process.env.GATEWAY_ALLOWED_ORIGINS.split(" "),
+  credentials: true,
+};
 
 // instantiate gateway
 const gateway = new ApolloGateway({
@@ -82,7 +86,7 @@ await server.start();
 // add middleware
 app.use(
   "/",
-  cors(),
+  cors(corsOptions),
   bodyParser.json(),
   expressjwt({
     secret: secret,
