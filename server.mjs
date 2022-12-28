@@ -14,11 +14,11 @@ import cors from "cors";
 import bodyParser from "body-parser";
 
 // server config
-const port = process.env.GATEWAY_PORT;
-const secret = process.env.GATEWAY_SECRET;
+const port = process.env.GATEWAY_PORT || 8000;
+const secret = process.env.GATEWAY_SECRET || "This-is-my-secret";
 const supergraphSchema = "/data/supergraph.graphql";
 const corsOptions = {
-  origin: process.env.GATEWAY_ALLOWED_ORIGINS.split(" "),
+  origin: (process.env.GATEWAY_ALLOWED_ORIGINS || "0.0.0.0 localhost 127.0.0.1").split(" "),
   credentials: true,
 };
 
