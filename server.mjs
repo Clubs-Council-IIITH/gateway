@@ -41,6 +41,10 @@ const gateway = new ApolloGateway({
                     "user",
                     context.user ? JSON.stringify(context.user) : null
                 );
+                request.http.headers.set(
+                    "cookies",
+                    context.cookies ? JSON.stringify(context.cookies) : null
+                );
             },
         }),
 });
@@ -75,6 +79,7 @@ app.use(
     expressMiddleware(server, {
         context: ({ req }) => ({
             user: req.auth || null,
+            cookies: req.cookies || null,
         }),
     })
 );
