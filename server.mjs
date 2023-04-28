@@ -1,6 +1,7 @@
 import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@apollo/server/express4";
 import { ApolloGateway, RemoteGraphQLDataSource } from "@apollo/gateway";
+import { ApolloServerPluginLandingPageDisabled } from "@apollo/server/plugin/disabled";
 import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
 
 import http from "http";
@@ -53,9 +54,12 @@ const gateway = new ApolloGateway({
 // instantiate server
 const server = new ApolloServer({
     gateway: gateway,
-    plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
+    plugins: [
+        ApolloServerPluginDrainHttpServer({ httpServer }),
+        ...(debug ? [] : [ApolloServerPluginLandingPageDisabled()]), // disable landing page on prod
+    ],
     playground: debug ? true : false, // disable introspection on prod
-    introspection: debug ? true: false, // disable introspection on prod
+    introspection: debug ? true : false, // disable introspection on prod
 });
 
 // ensure we wait for server to start
