@@ -13,10 +13,11 @@ import { readFileSync } from "fs";
 import { expressjwt } from "express-jwt";
 
 // gateway config
-const port = process.env.GATEWAY_PORT || 80;
+const debug = parseInt(process.env.DEBUG);
+const port = process.env.PORT || 80;
 const jwt_secret = process.env.JWT_SECRET || "this-is-the-greatest-secret-of-all-time";
 const corsOptions = {
-    origin: (process.env.GATEWAY_ALLOWED_ORIGINS || "localhost 127.0.0.1").split(" "),
+    origin: (process.env.ALLOWED_ORIGINS || "localhost 127.0.0.1").split(" "),
     credentials: true,
 };
 const supergraphSchema = "/data/supergraph.graphql";
@@ -53,6 +54,8 @@ const gateway = new ApolloGateway({
 const server = new ApolloServer({
     gateway: gateway,
     plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
+    playground: debug ? true : false, // disable introspection on prod
+    introspection: debug ? true: false, // disable introspection on prod
 });
 
 // ensure we wait for server to start
@@ -86,4 +89,4 @@ app.use(
 
 // modified server startup
 await new Promise((resolve) => httpServer.listen({ port }, resolve));
-console.log(`Gateway started at port ${port}.`);
+console.log(`Gateway started at port ${port}. Debug: ${debug}`);
