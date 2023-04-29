@@ -14,7 +14,7 @@ import { readFileSync } from "fs";
 import { expressjwt } from "express-jwt";
 
 // gateway config
-const debug = parseInt(process.env.GLOBAL_DEBUG);
+const debug = parseInt(process.env.GLOBAL_DEBUG, 0);
 const port = process.env.PORT || 80;
 const jwt_secret = process.env.JWT_SECRET || "this-is-the-greatest-secret-of-all-time";
 const corsOptions = {
