@@ -1,12 +1,13 @@
 # cache dependencies
-FROM node:18-slim as node_cache
+FROM node:20-slim as node_cache
 WORKDIR /cache/
 COPY package*.json .
-RUN npm prune
-RUN npm install --prefer-offline --no-audit --progress=false
+RUN npm config set registry http://registry.npmjs.org/ --global
+RUN npm prune --loglevel verbose
+RUN npm install --prefer-offline --no-audit --progress=true --loglevel verbose
 
 # build and start
-FROM node:18-slim as build
+FROM node:20-slim as build
 WORKDIR /gateway
 COPY --from=node_cache /cache/ .
 COPY . .
