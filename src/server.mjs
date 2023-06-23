@@ -21,7 +21,7 @@ const corsOptions = {
     origin: (process.env.GATEWAY_ALLOWED_ORIGINS || "localhost 127.0.0.1").split(" "),
     credentials: true,
 };
-const supergraphSchema = "/data/supergraph.graphql";
+const supergraphSchema = "./supergraph.graphql";
 
 // instantiate express app
 const app = express();
