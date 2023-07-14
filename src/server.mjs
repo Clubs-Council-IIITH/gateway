@@ -16,7 +16,7 @@ import { expressjwt } from "express-jwt";
 // gateway config
 const debug = parseInt(process.env.GLOBAL_DEBUG || 1);
 const port = process.env.GATEWAY_PORT || 80;
-const jwt_secret = process.env.JWT_SECRET || "this-is-the-greatest-secret-of-all-time";
+const jwt_secret = (process.env.JWT_SECRET || "this-is-the-greatest-secret-of-all-time") + "cc_gateway";
 const corsOptions = {
     origin: (process.env.GATEWAY_ALLOWED_ORIGINS || "localhost 127.0.0.1").split(" "),
     credentials: true,
