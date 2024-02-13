@@ -1,12 +1,12 @@
 # cache dependencies
-FROM node:20-slim as node_cache
+FROM node:20-slim AS node_cache
 WORKDIR /cache
 COPY package*.json .
 RUN npm config set registry http://registry.npmjs.org/ --global
 RUN npm install --prefer-offline --no-audit --progress=true --loglevel verbose --production
 
 # build and start
-FROM node:20-slim as build
+FROM node:20-slim AS build
 WORKDIR /gateway
 ENV APOLLO_ELV2_LICENSE accept
 COPY --from=node_cache /cache .
