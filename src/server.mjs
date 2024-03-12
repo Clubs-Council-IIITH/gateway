@@ -16,10 +16,13 @@ import { expressjwt } from "express-jwt";
 // gateway config
 const debug = parseInt(process.env.GLOBAL_DEBUG || 1);
 const port = process.env.GATEWAY_PORT || 80;
-const jwt_secret = process.env.JWT_SECRET || "this-is-the-greatest-secret-of-all-time";
+const jwt_secret =
+  process.env.JWT_SECRET || "this-is-the-greatest-secret-of-all-time";
 const corsOptions = {
-    origin: (process.env.GATEWAY_ALLOWED_ORIGINS || "localhost 127.0.0.1").split(" "),
-    credentials: true,
+  origin: (process.env.GATEWAY_ALLOWED_ORIGINS || "localhost 127.0.0.1").split(
+    " "
+  ),
+  credentials: true,
 };
 const supergraphSchema = "./supergraph.graphql";
 
@@ -32,34 +35,34 @@ const httpServer = http.createServer(app);
 
 // instantiate gateway
 const gateway = new ApolloGateway({
-    supergraphSdl: readFileSync(supergraphSchema).toString(),
-    buildService: ({ url }) =>
-        new RemoteGraphQLDataSource({
-            url,
+  supergraphSdl: readFileSync(supergraphSchema).toString(),
+  buildService: ({ url }) =>
+    new RemoteGraphQLDataSource({
+      url,
 
-            // pass user as context item
-            willSendRequest: ({ request, context }) => {
-                request.http.headers.set(
-                    "user",
-                    context.user ? JSON.stringify(context.user) : null
-                );
-                request.http.headers.set(
-                    "cookies",
-                    context.cookies ? JSON.stringify(context.cookies) : null
-                );
-            },
-        }),
+      // pass user as context item
+      willSendRequest: ({ request, context }) => {
+        request.http.headers.set(
+          "user",
+          context.user ? JSON.stringify(context.user) : null
+        );
+        request.http.headers.set(
+          "cookies",
+          context.cookies ? JSON.stringify(context.cookies) : null
+        );
+      },
+    }),
 });
 
 // instantiate server
 const server = new ApolloServer({
-    gateway: gateway,
-    plugins: [
-        ApolloServerPluginDrainHttpServer({ httpServer }),
-        ...(debug ? [] : [ApolloServerPluginLandingPageDisabled()]), // disable landing page on prod
-    ],
-    playground: debug ? true : false, // disable introspection on prod
-    introspection: debug ? true : false, // disable introspection on prod
+  gateway: gateway,
+  plugins: [
+    ApolloServerPluginDrainHttpServer({ httpServer }),
+    ...(debug ? [] : [ApolloServerPluginLandingPageDisabled()]), // disable landing page on prod
+  ],
+  playground: debug ? true : false, // disable introspection on prod
+  introspection: debug ? true : false, // disable introspection on prod
 });
 
 // ensure we wait for server to start
@@ -67,28 +70,28 @@ await server.start();
 
 // set up middleware
 app.use(
-    "/",
-    cors(corsOptions),
-    cookieParser(),
-    bodyParser.json(),
-    expressjwt({
-        secret: jwt_secret,
-        algorithms: ["HS256"],
-        credentialsRequired: false,
-        getToken: (req) => {
-            // fetch token from cookie
-            if ("Authorization" in req.cookies) {
-                return req.cookies.Authorization;
-            }
-            return null;
-        },
+  "/",
+  cors(corsOptions),
+  cookieParser(),
+  bodyParser.json(),
+  expressjwt({
+    secret: jwt_secret,
+    algorithms: ["HS256"],
+    credentialsRequired: false,
+    getToken: (req) => {
+      // fetch token from cookie
+      if ("Authorization" in req.cookies) {
+        return req.cookies.Authorization;
+      }
+      return null;
+    },
+  }),
+  expressMiddleware(server, {
+    context: ({ req }) => ({
+      user: req.auth || null,
+      cookies: req.cookies || null,
     }),
-    expressMiddleware(server, {
-        context: ({ req }) => ({
-            user: req.auth || null,
-            cookies: req.cookies || null,
-        }),
-    })
+  })
 );
 
 // modified server startup
