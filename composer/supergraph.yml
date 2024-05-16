@@ -5,6 +5,11 @@ subgraphs:
     schema:
       file: /subgraphs/clubs.graphql
 
+  members:
+    routing_url: http://members/graphql
+    schema:
+      file: /subgraphs/members.graphql
+
   events:
     routing_url: http://events/graphql
     schema:
