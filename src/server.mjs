@@ -73,7 +73,8 @@ app.use(
   "/",
   cors(corsOptions),
   cookieParser(),
-  bodyParser.json(),
+  bodyParser.json({limit: "50mb"}),
+  bodyParser.urlencoded({ limit: "50mb", extended: true, parameterLimit: 50000 }),
   expressjwt({
     secret: jwt_secret,
     algorithms: ["HS256"],
