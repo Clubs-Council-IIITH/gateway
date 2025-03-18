@@ -1,3 +1,34 @@
+/**
+1. Gateway and Schema Configuration:
+  - Reads the supergraph schema from "supergraph.graphql".
+  - Creates an ApolloGateway instance using the schema, and configures each remote
+    GraphQL service with RemoteGraphQLDataSource that puts
+    user and cookies information into outgoing requests via headers.
+
+2. Apollo Server Initialization:
+  - Enables GraphQL Playground and introspection if in debug mode.
+  - Instantiates an ApolloServer using the gateway. It adds plugin for:
+    - ApolloServerPluginDrainHttpServer: Does graceful shutdown by draining the HTTP server.
+    - ApolloServerPluginLandingPageDisabled: Disables the landing page in production.
+
+3. Express Server and Middleware Setup:
+  - Creates an Express app and an HTTP server to handle incoming requests.
+  - Configures middleware for:
+    - CORS: Restricts allowed origins taken from env (if it exists) or just to localhost.
+    - Cookie Parsing: Enables access to cookies on incoming requests.
+    - JSON Body Parsing: Processes JSON request bodies.
+    - JWT Authentication: Uses express-jwt to decode JWT tokens from "Authorization" cookie, 
+      making the user data available in the request.
+    - Apollo Express Middleware: Connects the Apollo Server to the Express app,
+      making the GraphQL context from the authenticated user and cookies.
+
+4. Server Startup:
+  - Starts the Apollo Server and attaches it to the Express middleware.
+  - Begins listening on the configured port from env (if it exists) or port 80, logging a startup message indicating
+    the port and debug mode status.
+*/
+
+
 import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@apollo/server/express4";
 import { ApolloGateway, RemoteGraphQLDataSource } from "@apollo/gateway";
