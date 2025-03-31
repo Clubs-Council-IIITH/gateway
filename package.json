@@ -1,10 +1,11 @@
 {
   "name": "gateway",
+  "type": "module",
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "start": "node src/server.mjs"
+    "start": "node src/server.js"
   },
   "dependencies": {
     "@apollo/gateway": "^2.9.3",
