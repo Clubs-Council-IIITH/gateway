@@ -36,7 +36,7 @@ function customLogger(level, message) {
     hour12: false
   }).replace(/(\d+)\/(\d+)\/(\d+),\s(\d+):(\d+):(\d+)/, '$3-$1-$2 $4:$5:$6');
   
-  console.log(`[${timestamp} IST] ${level}: ${message}`);
+  console.log(`[${timestamp}] ${level}: ${message}`);
 }
 
 // Logger convenience methods
