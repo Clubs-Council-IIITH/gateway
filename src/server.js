@@ -25,11 +25,18 @@ import { expressjwt } from "express-jwt";
  */
 function customLogger(level, message) {
   const now = new Date();
-  const timestamp = now.toISOString()
-    .replace(/T/, ' ')
-    .replace(/\..+/, '')
-    .substring(0, 19);
-  console.log(`[${timestamp}] ${level}: ${message}`);
+  const timestamp = now.toLocaleString('en-US', { 
+    timeZone: 'Asia/Kolkata',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
+  }).replace(/(\d+)\/(\d+)\/(\d+),\s(\d+):(\d+):(\d+)/, '$3-$1-$2 $4:$5:$6');
+  
+  console.log(`[${timestamp} IST] ${level}: ${message}`);
 }
 
 // Logger convenience methods
