@@ -19,10 +19,40 @@ import { readFileSync } from "fs";
 import { expressjwt } from "express-jwt";
 
 /**
+ * Custom logger function with timestamp
+ * @param {string} level - Log level (INFO, ERROR, DEBUG)
+ * @param {string} message - Log message
+ */
+function customLogger(level, message) {
+  const now = new Date();
+  const timestamp = now.toLocaleString('en-US', { 
+    timeZone: 'Asia/Kolkata',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
+  }).replace(/(\d+)\/(\d+)\/(\d+),\s(\d+):(\d+):(\d+)/, '$3-$1-$2 $4:$5:$6');
+  
+  console.log(`[${timestamp}] ${level}: ${message}`);
+}
+
+// Logger convenience methods
+const logger = {
+  info: (message) => customLogger('INFO', message),
+  error: (message) => customLogger('ERROR', message),
+  debug: (message) => {
+    if (debug) customLogger('DEBUG', message);
+  }
+};
+
+/**
  * Debug flag indicating if the gateway is in debug mode.
  * @constant {number}
  */
-const debug = parseInt(process.env.GLOBAL_DEBUG || 1);
+const debug = parseInt(process.env.GLOBAL_DEBUG || 0);
 
 /**
  * Port on which the gateway server will listen.
@@ -68,6 +98,8 @@ const app = express();
  */
 const httpServer = http.createServer(app);
 
+logger.info("Initializing Apollo Gateway");
+
 /**
  * Apollo Gateway instance configured with the supergraph schema.
  * @type {ApolloGateway}
@@ -86,8 +118,9 @@ const gateway = new ApolloGateway({
    * @param {string} param0.url - URL of the remote GraphQL service.
    * @returns {RemoteGraphQLDataSource} Instance of RemoteGraphQLDataSource.
    */
-  buildService: ({ url }) =>
-    new RemoteGraphQLDataSource({
+  buildService: ({ url }) => {
+    logger.debug(`Building service for URL: ${url}`);
+    return new RemoteGraphQLDataSource({
       url,
       /**
        * Hook executed before sending a request to a remote service.
@@ -107,7 +140,8 @@ const gateway = new ApolloGateway({
           context.cookies ? JSON.stringify(context.cookies) : null
         );
       },
-    }),
+    });
+  },
 });
 
 /**
@@ -122,6 +156,33 @@ const server = new ApolloServer({
     ApolloServerPluginDrainHttpServer({ httpServer }),
     // Disable landing page on production if debug flag is false
     ...(debug ? [] : [ApolloServerPluginLandingPageDisabled()]),
+    // Custom plugin for request logging
+    {
+      async serverWillStart() {
+        logger.info("Apollo Server starting");
+        return {
+          async serverWillStop() {
+            logger.info("Apollo Server stopping");
+          },
+        };
+      },
+      async requestDidStart() {
+        const startTime = Date.now();
+        logger.debug("Request started");
+        
+        return {
+          async didEncounterErrors({ errors }) {
+            errors.forEach(error => {
+              logger.error(`GraphQL error: ${error.message}`);
+            });
+          },
+          async willSendResponse({ response }) {
+            const duration = Date.now() - startTime;
+            logger.debug(`Request completed in ${duration}ms`);
+          }
+        };
+      }
+    }
   ],
   playground: debug ? true : false, // Enable playground in debug mode only
   introspection: debug ? true : false, // Enable introspection in debug mode only
@@ -129,6 +190,7 @@ const server = new ApolloServer({
 
 // Ensure the Apollo server is started before handling requests
 await server.start();
+logger.info("Apollo Server started successfully");
 
 // Apply middleware to the Express application.
 app.use(
@@ -165,4 +227,4 @@ app.use(
 
 // Starts the HTTP server and listens on the configured port.
 await new Promise((resolve) => httpServer.listen({ port }, resolve));
-console.log(`Gateway started at port ${port}. Debug: ${debug}`);
+logger.info(`Gateway started at port ${port}. Debug: ${debug}`);
