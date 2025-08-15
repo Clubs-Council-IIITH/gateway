@@ -227,11 +227,6 @@ app.use(
   })
 );
 
-// Health check endpoint
-app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'healthy', timestamp: new Date().toISOString() });
-});
-
 // Starts the HTTP server and listens on the configured port.
 await new Promise((resolve) => httpServer.listen({ port }, resolve));
 logger.info(`Gateway started at port ${port}. Debug: ${debug}`);
