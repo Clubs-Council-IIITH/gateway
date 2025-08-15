@@ -4,7 +4,7 @@
  */
 
 import { ApolloServer } from "@apollo/server";
-import { expressMiddleware } from "@apollo/server/express4";
+import { expressMiddleware } from "@as-integrations/express5";
 import { ApolloGateway, RemoteGraphQLDataSource } from "@apollo/gateway";
 import { ApolloServerPluginLandingPageDisabled } from "@apollo/server/plugin/disabled";
 import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
@@ -116,10 +116,11 @@ const gateway = new ApolloGateway({
    *
    * @param {Object} param0 - Service configuration.
    * @param {string} param0.url - URL of the remote GraphQL service.
+   * @param {string} param0.name - Name of the remote GraphQL service.
    * @returns {RemoteGraphQLDataSource} Instance of RemoteGraphQLDataSource.
    */
-  buildService: ({ url }) => {
-    logger.debug(`Building service for URL: ${url}`);
+  buildService: ({ url, name }) => {
+    logger.debug(`Building service for URL: ${url}, Name: ${name}`);
     return new RemoteGraphQLDataSource({
       url,
       /**
@@ -131,14 +132,14 @@ const gateway = new ApolloGateway({
        * @param {Object} params.context - The current request context.
        */
       willSendRequest: ({ request, context }) => {
-        request.http.headers.set(
-          "user",
-          context.user ? JSON.stringify(context.user) : null
-        );
-        request.http.headers.set(
-          "cookies",
-          context.cookies ? JSON.stringify(context.cookies) : null
-        );
+          request.http.headers.set(
+            "user",
+            context.user ? JSON.stringify(context.user) : null
+          );
+          request.http.headers.set(
+            "cookies",
+            context.cookies ? JSON.stringify(context.cookies) : null
+          );
       },
     });
   },
@@ -168,12 +169,14 @@ const server = new ApolloServer({
       },
       async requestDidStart() {
         const startTime = Date.now();
-        logger.debug("Request started");
         
         return {
           async didEncounterErrors({ errors }) {
             errors.forEach(error => {
               logger.error(`GraphQL error: ${error.message}`);
+              if (debug) {
+                logger.debug(`Error stack: ${error.stack}`);
+              }
             });
           },
           async willSendResponse({ response }) {
@@ -184,8 +187,7 @@ const server = new ApolloServer({
       }
     }
   ],
-  playground: debug ? true : false, // Enable playground in debug mode only
-  introspection: debug ? true : false, // Enable introspection in debug mode only
+  introspection: debug ? true : false,
 });
 
 // Ensure the Apollo server is started before handling requests
@@ -224,6 +226,11 @@ app.use(
     }),
   })
 );
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'healthy', timestamp: new Date().toISOString() });
+});
 
 // Starts the HTTP server and listens on the configured port.
 await new Promise((resolve) => httpServer.listen({ port }, resolve));
