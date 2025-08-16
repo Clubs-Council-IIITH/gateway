@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# Script to download, extract, and repackage Apollo Rover supergraph binary
-# Usage: ./update-rover.sh
-
 set -e  # Exit on any error
 
 # Configuration
