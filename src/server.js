@@ -194,6 +194,11 @@ const server = new ApolloServer({
 await server.start();
 logger.info("Apollo Server started successfully");
 
+// Health check endpoint to verify server status.
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "ok" });
+});
+
 // Apply middleware to the Express application.
 app.use(
   "/",
