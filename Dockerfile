@@ -14,6 +14,6 @@ ENV APOLLO_TELEMETRY_DISABLED=1
 COPY --from=node_cache /cache .
 COPY . .
 
-RUN tar -xvf ./composer/supergraph-v2.9.3-bin.tar.gz -C ./node_modules/@apollo/rover/binary/
+RUN tar -xvf ./composer/supergraph-v2.13.3-bin.tar.gz -C ./node_modules/@apollo/rover/binary/
 
 ENTRYPOINT [ "./entrypoint.sh" ]
