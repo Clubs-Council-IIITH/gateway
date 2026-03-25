@@ -1,12 +1,12 @@
 # cache dependencies
-FROM node:22-slim AS node_cache
+FROM node:24-slim AS node_cache
 WORKDIR /cache
 COPY package*.json ./
 RUN npm config set registry http://registry.npmjs.org/ --global
 RUN npm install --prefer-offline --no-audit --progress=true --loglevel verbose
 
 # build and start
-FROM node:22-slim AS build
+FROM node:24-slim AS build
 WORKDIR /gateway
 ENV APOLLO_ELV2_LICENSE=accept
 ENV APOLLO_TELEMETRY_DISABLED=1
