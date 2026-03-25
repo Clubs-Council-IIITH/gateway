@@ -2,7 +2,7 @@
 FROM node:24-slim AS node_cache
 WORKDIR /cache
 COPY package*.json ./
-RUN npm config set registry http://registry.npmjs.org/ --global
+RUN npm config set registry https://registry.npmjs.org/ --global
 RUN npm install --prefer-offline --no-audit --progress=true --loglevel verbose
 
 # build and start
