@@ -3,7 +3,7 @@
 set -e  # Exit on any error
 
 # Configuration
-ROVER_VERSION="v2.9.3"
+ROVER_VERSION="v2.13.3"
 COMPOSER_DIR="composer"
 TEMP_DIR="rover_temp"
 DOWNLOAD_URL="https://rover.apollo.dev/tar/supergraph/x86_64-unknown-linux-gnu/${ROVER_VERSION}"
@@ -197,7 +197,7 @@ remove_downloaded_tar() {
 # Update supergraph.yml with new federation version
 update_supergraph_yml() {
     local supergraph_yml_path="$COMPOSER_DIR/supergraph.yml"
-    local federation_version="2.9.3"
+    local federation_version="${ROVER_VERSION#v}"  # Remove 'v' prefix for version number
     
     log_info "Updating supergraph.yml with new federation version..."
     
