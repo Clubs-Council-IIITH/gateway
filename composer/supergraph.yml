@@ -24,3 +24,13 @@ subgraphs:
     routing_url: http://interfaces/graphql
     schema:
       file: /subgraphs/interfaces.graphql
+
+  items:
+    routing_url: http://items/graphql
+    schema:
+      file: /subgraphs/items.graphql
+
+  transactions:
+    routing_url: http://transactions/graphql
+    schema:
+      file: /subgraphs/transactions.graphql
