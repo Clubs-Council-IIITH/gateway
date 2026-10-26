@@ -29,3 +29,13 @@ subgraphs:
     routing_url: http://achievements/graphql
     schema:
       file: /subgraphs/achievements.graphql
+
+  items:
+    routing_url: http://items/graphql
+    schema:
+      file: /subgraphs/items.graphql
+
+  transactions:
+    routing_url: http://transactions/graphql
+    schema:
+      file: /subgraphs/transactions.graphql
