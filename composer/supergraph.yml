@@ -25,6 +25,11 @@ subgraphs:
     schema:
       file: /subgraphs/interfaces.graphql
 
+  achievements:
+    routing_url: http://achievements/graphql
+    schema:
+      file: /subgraphs/achievements.graphql
+
   items:
     routing_url: http://items/graphql
     schema:
